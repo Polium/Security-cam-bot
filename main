@@ -1,0 +1,69 @@
+import discord
+import time
+import random
+import asyncio
+from discord.ext import commands
+from discord.ext import tasks
+from discord.utils import get
+from discord import FFmpegPCMAudio
+
+prefix = '$'
+userID = ""
+botToken = ""
+
+intents = discord.Intents.all()
+
+client = commands.Bot(command_prefix=prefix, case_insensitive=True, intents=intents)
+client.remove_command('help')
+randtime = 1
+
+
+@client.event
+async def on_ready():
+    await client.change_presence(status=discord.Status.online, activity=discord.Game(f"{prefix}Help"))
+    print('Cams are up')
+
+
+@client.command(pass_context=True, aliases=['j', 'join'])
+async def join1(ctx):
+    print("join")
+    channel = ctx.message.author.voice.channel
+    voice = get(client.voice_clients, guild=ctx.guild)
+
+    if ctx.voice_client is not None:
+        return await ctx.voice_client.move_to(channel)
+    else:
+        voice = await channel.connect()
+
+    await ctx.send(f"Joined {channel}")
+
+    await asyncio.sleep(5)
+    while True:
+        await asyncio.sleep(random.randint(10, 60))
+        roll = random.randint(1, 100)
+        print(roll)
+        if roll >= 50:
+            print("Beep")
+            voice.play(discord.FFmpegPCMAudio('./sounds/Payday 2 camera beep.mp3'))
+        elif roll >= 20:
+            print("ambient stealth music")
+            voice.play(discord.FFmpegPCMAudio('./sounds/Payday 2 And Now We Run.mp3'))
+        elif roll >= 2:
+            print("caught beep")
+            voice.play(discord.FFmpegPCMAudio('./sounds/Payday 2 camera full.mp3'))
+        else:
+            print("rolled a one")
+            voice.play(discord.FFmpegPCMAudio('./sounds/Im Strokin Meme Sound Effect  Soundboard Link.mp3'))
+
+
+@client.command(pass_context=True, aliases=['l', 'leave'])
+async def leave1(ctx):
+    await ctx.voice_client.disconnect()
+
+
+@client.command(aliases=['Help', 'h'])
+async def payday1(ctx):
+    await ctx.send(f"Use {prefix}join")
+
+
+asyncio.run(client.run(botToken))
